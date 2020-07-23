@@ -1,11 +1,11 @@
-module NinetyNine.Tests
+namespace NinetyNine.Tests
 
 open NUnit.Framework
 open NinetyNine.First
 
 
 [<TestFixture>]
-type Testen() =
+type TestFirst() =
 
     [<Test>]
     member this.LastSome() =
