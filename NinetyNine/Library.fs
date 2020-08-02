@@ -13,6 +13,11 @@ module Helper =
         | [] -> acc
         | x :: xs -> fold f (f acc x) xs
 
+    let rec filter f =
+        function
+        | [] -> []
+        | x :: xs -> if (f x) then x :: filter f xs else filter f xs
+
     let rev list =
         let rec helper acc =
             function
@@ -51,6 +56,16 @@ module Helper =
         | x :: xs, _ -> x :: take (n - 1) xs
 
     let slice n m list = list |> drop n |> take (m - n + 1)
+
+    let rec sort list f =
+        let lessOrEqual fst list = filter (fun x -> f x fst <= 0) list
+        let greater fst list = filter (fun x -> f x fst > 0) list
+        match list with
+        | [] -> []
+        | x :: xs ->
+            sort (lessOrEqual x xs) f
+            @ [ x ]
+            @ sort (greater x xs) f
 
 
 
@@ -177,7 +192,7 @@ module Second =
     let duplicate list = Helper.replicate list 2
 
     /// replicate takes a list and a count and returns a new list with each elemtent
-    /// 
+    ///
     /// replicated the count no. of times
     let replicate = Helper.replicate
 
@@ -203,7 +218,7 @@ module Second =
         helper [] list n
 
     /// slice returns a slice from list passed containing elems between i and k inclusive
-    /// 
+    ///
     /// 0 indexed
     let slice list n m = list |> Helper.slice n m
 
@@ -215,26 +230,26 @@ module Second =
         match n with
         | _ when n < 0 -> split list (len + n) |> reverse |> join
         | _ -> split list n |> reverse |> join
-    
+
     /// removeAt returns list with element removed at k
-    /// 
+    ///
     /// 0 indexed
     let removeAt k list =
         Helper.take k list @ Helper.drop (k + 1) list
 
 
 /// third set of problems
-/// 
+///
 /// seed for random is 42
 module Third =
 
     /// insertAt returns list with elem inserted at index i
-    /// 
+    ///
     /// 0 indexed
     let rec insertAt elem i list =
         match list, i with
-        | [], _ -> [elem]
-        | x :: xs, 1 ->  x :: elem :: xs
+        | [], _ -> [ elem ]
+        | x :: xs, 1 -> x :: elem :: xs
         | _, _ when i < 0 -> raise (Failure "negative index")
         | x :: xs, _ -> x :: insertAt elem (i - 1) xs
 
@@ -244,20 +259,23 @@ module Third =
             match n with
             | _ when n = m -> (m :: acc)
             | _ -> generate (n - 1) m (n :: acc)
+
         match n, m with
-        | _  when n >= m -> generate n m [] |> Helper.rev
+        | _ when n >= m -> generate n m [] |> Helper.rev
         | _ -> generate m n []
 
     /// randSelect extracts list of n randomly selected element from a list
-    /// 
+    ///
     /// uses Fisher–Yates shuffle
     let randSelect list n =
         let rnd = System.Random(42)
         let arr = List.toArray list
+
         let swap i j =
             let temp = arr.[i]
             Array.set arr i arr.[j]
             Array.set arr j temp
+
         for i = 0 to ((Array.length arr) - 1) do
             let j = rnd.Next(i, (Array.length arr) - 1)
             swap i j
@@ -266,28 +284,44 @@ module Third =
     /// lottoSelect return list with n different random numbers from set of 1 to M
     let lottoSelect n m =
         let rnd = System.Random(42)
+
         let rec helper n m =
             let draw = rnd.Next(1, m)
             match n with
             | _ when n < 1 -> raise (Failure "n should be postive")
             | 1 -> [ draw ]
             | _ -> draw :: helper (n - 1) m
+
         helper n m
-        
+
     /// permutaion return random permutation of the elements of list
-    let permutation list =
-        randSelect list (Helper.length list)
+    let permutation list = randSelect list (Helper.length list)
 
     /// extract generates combination of k distinct elemenets chosed from element list
     let rec extract k list =
-        match k with
-        | _ when k <= 0 -> [ [] ]
-        | _ ->
-        begin
+        if k <= 0 then
+            [ [] ]
+        else
             match list with
             | [] -> []
             | x :: xs ->
-                let withX = Helper.map (fun y -> x :: y) (extract (k - 1) xs)
-                let withoutX = extract (k - 1) xs
+                let withX =
+                    Helper.map (fun y -> x :: y) (extract (k - 1) xs)
+
+                let withoutX = extract k xs
                 withX @ withoutX
-        end
+
+    // TODO: group the elements of a set into disjoint subsets
+
+    let lengthSort list =
+        let lengthfun x y =
+            compare (Helper.length x) (Helper.length y)
+
+        Helper.sort list lengthfun
+
+    let frequencySort list =
+        let freqList = Helper.map (fun x -> x, Helper.length x) list
+        let freqfun (_, xlen) (_, ylen) = compare xlen ylen
+        Helper.sort freqList freqfun
+        |> Helper.map (fun (x, _) -> x)
+        
