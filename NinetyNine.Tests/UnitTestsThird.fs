@@ -73,7 +73,7 @@ type TestThird() =
         Assert.AreEqual(expected, got)
 
     [<Test>]
-    member this.frequencySort() =
+    member this.FrequencySort() =
         let expected =
             [ [ "i"; "j"; "k"; "l" ]
               [ "o" ]
@@ -85,12 +85,12 @@ type TestThird() =
 
         let got =
             frequencySort
-                [ [ "a"; "b"; "c" ]
-                  [ "d"; "e" ]
-                  [ "f"; "g"; "h" ]
-                  [ "d"; "e" ]
+                [ [ "o" ]
                   [ "i"; "j"; "k"; "l" ]
+                  [ "f"; "g"; "h" ]
+                  [ "a"; "b"; "c" ]
                   [ "m"; "n" ]
-                  [ "o" ] ]
+                  [ "d"; "e" ]
+                  [ "d"; "e" ] ]
 
         Assert.AreEqual(expected, got)

@@ -313,15 +313,27 @@ module Third =
 
     // TODO: group the elements of a set into disjoint subsets
 
+    /// lengthSort returns a list sorted according to the length of the sublists
     let lengthSort list =
         let lengthfun x y =
             compare (Helper.length x) (Helper.length y)
 
         Helper.sort list lengthfun
 
+    /// frequencySort returns sorted list according to the legnth frequencies of the list
+    /// eg -> frequencySort [ ["a";"b";"c"]; ["d";"e"]; ["f";"g";"h"]; ["d";"e"];
+    /// ["i";"j";"k";"l"]; ["m";"n"]; ["o"] ]
+    /// 
+    /// [["o"]; ["i"; "j"; "k"; "l"]; ["f"; "g"; "h"]; ["a"; "b"; "c"]; ["m"; "n"];
+    /// ["d"; "e"]; ["d"; "e"]]
     let frequencySort list =
-        let freqList = Helper.map (fun x -> x, Helper.length x) list
-        let freqfun (_, xlen) (_, ylen) = compare xlen ylen
-        Helper.sort freqList freqfun
-        |> Helper.map (fun (x, _) -> x)
+        let sortFun (_, x) (_, y) = compare x y
+        let lengths = Helper.sort (Helper.map  Helper.length list) compare
+        let encodedLengths = First.encode lengths
+        let find k = List.tryFind (fun (_, x) -> x = k)
+        let extract = function
+        | Some (x, _) -> x 
+        | None -> raise (Failure "woops")
+        let freqList = Helper.map (fun x -> x, find (Helper.length x) encodedLengths |> extract) list
+        Helper.sort freqList sortFun |> Helper.map fst
         
